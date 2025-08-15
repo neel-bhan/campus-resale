@@ -1,4 +1,19 @@
 @import "tailwindcss";
 
 /* your global styles if needed */
-:root { color-scheme: light dark; }
+:root {
+    min-height: 100vh;
+    width: 100vw;
+    background: #000;
+    color-scheme: light dark;
+}
+
+html, body {
+    min-height: 100vh;
+    width: 100vw;
+    background: #000;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
