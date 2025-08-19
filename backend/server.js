@@ -5,6 +5,7 @@ const { testConnection } = require("./config/database");
 
 // Import routes
 const userRoutes = require("./routes/userRoutes");
+const postRoutes = require("./routes/postRoutes");
 
 const app = express();
 
@@ -20,11 +21,14 @@ app.get("/api/health", (req, res) => {
 // User authentication routes
 app.use("/api/users", userRoutes);
 
+// Post routes
+app.use("/api/posts", postRoutes);
+
 const PORT = process.env.PORT || 3001;
 
 // Start server and test database connection
 app.listen(PORT, async () => {
   console.log(`🚀 API listening on http://localhost:${PORT}`);
-  console.log('🔄 Testing database connection...');
+  console.log("🔄 Testing database connection...");
   await testConnection();
 });

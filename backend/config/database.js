@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -9,29 +9,29 @@ const pool = new Pool({
 });
 
 // Test the connection
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
+pool.on("connect", () => {
+  console.log("✅ Connected to PostgreSQL database");
 });
 
-pool.on('error', (err) => {
-  console.error('❌ PostgreSQL connection error:', err);
+pool.on("error", (err) => {
+  console.error("❌ PostgreSQL connection error:", err);
 });
 
 // Function to test database connection
 const testConnection = async () => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT NOW()');
-    console.log('🔗 Database connection test successful:', result.rows[0]);
+    const result = await client.query("SELECT NOW()");
+    console.log("🔗 Database connection test successful:", result.rows[0]);
     client.release();
     return true;
   } catch (error) {
-    console.error('❌ Database connection test failed:', error);
+    console.error("❌ Database connection test failed:", error);
     return false;
   }
 };
 
 module.exports = {
   pool,
-  testConnection
+  testConnection,
 };
