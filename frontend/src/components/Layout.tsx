@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -7,7 +7,6 @@ interface LayoutProps {
 }
 
 export function Layout({ children, user, onLogout }: LayoutProps) {
-
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -17,7 +16,7 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
             <span className="text-white">Campus</span>
             <span className="text-teal-400">Resale</span>
           </div>
-          
+
           {user && (
             <div className="flex items-center gap-4">
               <span className="text-gray-300">Welcome, {user?.name}!</span>
@@ -33,9 +32,7 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 bg-black">

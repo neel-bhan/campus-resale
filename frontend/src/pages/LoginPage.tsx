@@ -3,7 +3,15 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, AlertCircle, ArrowLeft, Sparkles, Shield, Users } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  AlertCircle,
+  ArrowLeft,
+  Sparkles,
+  Shield,
+  Users,
+} from "lucide-react";
 import { loginUser, registerUser, setAuthToken } from "@/utils/api";
 import type { LoginRequest, RegisterRequest } from "@/utils/api";
 
@@ -18,11 +26,6 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Redirect if already logged in
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   // Login form state
   const [loginForm, setLoginForm] = useState<LoginRequest>({
@@ -39,6 +42,11 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
     name: "",
     university: "",
   });
+
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   // Handle login form submission
   const handleLogin = async (e: React.FormEvent) => {
@@ -79,6 +87,7 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
       if (response.data && response.data.token) {
         setAuthToken(response.data.token);
         onLoginSuccess?.(response.data.token, response.data.user);
+        navigate("/dashboard");
       } else {
         setError(response.error || "Registration failed");
       }
@@ -103,8 +112,8 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6">
-        <button 
-          onClick={() => navigate('/')}
+        <button
+          onClick={() => navigate("/")}
           className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -123,7 +132,7 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
           <div className="relative">
             {/* Card glow effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-teal-400/20 to-blue-400/20 rounded-3xl blur opacity-25"></div>
-            
+
             {/* Main card */}
             <div className="relative bg-gray-900/40 backdrop-blur-xl border border-gray-800/50 rounded-3xl p-8 shadow-2xl">
               {/* Header with icon */}
@@ -136,10 +145,9 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
                   {isSignUp ? "Join the Community" : "Welcome Back"}
                 </h1>
                 <p className="text-gray-400">
-                  {isSignUp 
-                    ? "Create your student account to get started" 
-                    : "Sign in to access your campus marketplace"
-                  }
+                  {isSignUp
+                    ? "Create your student account to get started"
+                    : "Sign in to access your campus marketplace"}
                 </p>
               </div>
 
@@ -152,7 +160,10 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
               )}
 
               {/* Form */}
-              <form onSubmit={isSignUp ? handleRegister : handleLogin} className="space-y-6">
+              <form
+                onSubmit={isSignUp ? handleRegister : handleLogin}
+                className="space-y-6"
+              >
                 {isSignUp && (
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-gray-300 font-medium">
@@ -207,7 +218,10 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
 
                 {isSignUp && (
                   <div className="space-y-2">
-                    <Label htmlFor="university" className="text-gray-300 font-medium">
+                    <Label
+                      htmlFor="university"
+                      className="text-gray-300 font-medium"
+                    >
                       University
                     </Label>
                     <div className="relative">
@@ -231,7 +245,10 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-300 font-medium">
+                  <Label
+                    htmlFor="password"
+                    className="text-gray-300 font-medium"
+                  >
                     Password
                   </Label>
                   <div className="relative">
@@ -239,7 +256,9 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      value={isSignUp ? registerForm.password : loginForm.password}
+                      value={
+                        isSignUp ? registerForm.password : loginForm.password
+                      }
                       onChange={(e) => {
                         if (isSignUp) {
                           setRegisterForm((prev) => ({
@@ -261,7 +280,11 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -276,8 +299,10 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
                       <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                       {isSignUp ? "Creating Account..." : "Signing In..."}
                     </div>
+                  ) : isSignUp ? (
+                    "Create Account"
                   ) : (
-                    isSignUp ? "Create Account" : "Sign In"
+                    "Sign In"
                   )}
                 </Button>
               </form>
@@ -285,7 +310,9 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
               {/* Switch between login and signup */}
               <div className="mt-8 text-center">
                 <p className="text-gray-400 mb-4">
-                  {isSignUp ? "Already have an account?" : "Don't have an account?"}
+                  {isSignUp
+                    ? "Already have an account?"
+                    : "Don't have an account?"}
                 </p>
                 <button
                   type="button"
@@ -302,7 +329,9 @@ export function LoginPage({ onLoginSuccess, user }: LoginPageProps) {
               {/* Features showcase for signup */}
               {isSignUp && (
                 <div className="mt-8 pt-6 border-t border-gray-800/50">
-                  <p className="text-gray-400 text-sm text-center mb-4">Join thousands of students trading safely</p>
+                  <p className="text-gray-400 text-sm text-center mb-4">
+                    Join thousands of students trading safely
+                  </p>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="p-3 bg-gray-800/30 rounded-xl">
                       <div className="w-8 h-8 bg-teal-400/20 rounded-lg flex items-center justify-center mx-auto mb-2">

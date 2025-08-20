@@ -10,7 +10,12 @@ import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { Dashboard } from "./pages/Dashboard";
-import { setAuthToken, clearAuthToken } from "./utils/api";
+import {
+  setAuthToken,
+  clearAuthToken,
+  getCurrentUserProfile,
+  getAuthToken,
+} from "./utils/api";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -27,15 +32,32 @@ function App() {
     clearAuthToken();
   };
 
-  // Check for existing auth token on app start
+  // Check for existing auth token on app start and fetch user data
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      // In a real app, you would validate the token with your backend
-      // For now, we'll just set a placeholder user
-      setUser({ name: "Student User", email: "student@university.edu" });
-    }
-    setIsLoading(false);
+    const checkAuthToken = async () => {
+      const token = getAuthToken();
+      if (token) {
+        try {
+          // Fetch actual user profile from backend
+          const response = await getCurrentUserProfile();
+          if (response.data && response.data.user) {
+            setUser(response.data.user);
+          } else {
+            // Token is invalid, clear it
+            clearAuthToken();
+            setUser(null);
+          }
+        } catch (error) {
+          // Error fetching user data, clear token
+          console.error("Error fetching user profile:", error);
+          clearAuthToken();
+          setUser(null);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuthToken();
   }, []);
 
   if (isLoading) {
