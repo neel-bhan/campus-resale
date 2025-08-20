@@ -1,9 +1,29 @@
 const { pool } = require("../config/database");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-// Create a new post
+// Configure multer for image uploads
+const storage = multer.memoryStorage(); // Store in memory temporarily
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow image files
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
+
+// Create a new post (with optional images)
 const createPost = async (req, res) => {
   try {
-    const sellerId = req.user.userId; // From JWT token
+    const sellerId = req.user.userId;
     const {
       title,
       description,
@@ -23,6 +43,34 @@ const createPost = async (req, res) => {
       });
     }
 
+    // Images are required for most categories except game tickets
+    if (!req.files || req.files.length === 0) {
+      if (category !== "game-tickets") {
+        return res.status(400).json({
+          success: false,
+          message: "At least one image is required for this category",
+        });
+      }
+    }
+
+    // Handle image uploads if present
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        // Generate unique filename
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const filename =
+          "post-" + uniqueSuffix + path.extname(file.originalname);
+        const filepath = path.join(__dirname, "..", filename);
+
+        // Save file to disk
+        fs.writeFileSync(filepath, file.buffer);
+
+        // Store the filename (not full path) for the database
+        imageUrls.push(filename);
+      }
+    }
+
     // Get user's university from their profile
     const userQuery = await pool.query(
       "SELECT university FROM users WHERE id = $1",
@@ -38,10 +86,10 @@ const createPost = async (req, res) => {
 
     const university = userQuery.rows[0].university;
 
-    // Create new post
+    // Create new post with images
     const newPostQuery = await pool.query(
-      `INSERT INTO posts (title, description, price, category, seller_id, university, contact_method, course, event, location)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO posts (title, description, price, category, seller_id, university, contact_method, course, event, location, images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         title,
@@ -54,6 +102,7 @@ const createPost = async (req, res) => {
         course,
         event,
         location,
+        imageUrls,
       ]
     );
 
@@ -385,4 +434,5 @@ module.exports = {
   updatePost,
   deletePost,
   markAsSold,
+  upload, // Export multer middleware
 };

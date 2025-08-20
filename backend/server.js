@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const { testConnection } = require("./config/database");
 
 // Import routes
@@ -12,6 +13,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files (images) from the backend directory
+app.use("/images", express.static(path.join(__dirname)));
 
 // Routes
 app.get("/api/health", (req, res) => {

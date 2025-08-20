@@ -66,7 +66,16 @@ Register a new user.
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
-      "id": 2,
+      ## 📝 Notes
+
+- **Image uploads**: Use `multipart/form-data` for post creation with images
+- **Image storage**: Images are stored in the backend directory and served via `/images/` endpoint
+- **Image access**: Frontend can access images using `http://localhost:3001/images/{filename}`
+- **Image requirements**: Required for all categories except `game-tickets`
+- **Authentication**: JWT tokens required for all protected routes
+- **Token expiration**: JWT tokens expire after 24 hours
+- **Password security**: Passwords are automatically hashed with bcrypt
+- **University isolation**: Users only see posts from their own university 2,
       "email": "student@university.edu",
       "name": "John Doe",
       "university": "University of California",
@@ -384,29 +393,74 @@ curl -X PUT http://localhost:3001/api/users/profile \
 
 ### 1. POST /api/posts
 
-Create a new marketplace listing.
+Create a new marketplace listing with images.
 
 **Authentication:** Required (JWT token)
 
-**Request Body:**
+**Content-Type:** `multipart/form-data`
 
-```json
-{
-  "title": "MacBook Pro 2021",
-  "description": "Excellent condition MacBook Pro, barely used. Perfect for computer science students!",
-  "price": 1299.99,
-  "category": "Electronics",
-  "contactMethod": "email",
-  "course": "CS 106A",
-  "event": "Stanford vs Cal Game",
-  "location": "Campus Library"
-}
+**Form Fields:**
+
+```
+title: "MacBook Pro 2021"
+description: "Excellent condition MacBook Pro, barely used. Perfect for computer science students!"
+price: 1299.99
+category: "Electronics"
+contactMethod: "email"
+course: "CS 106A"
+event: "Stanford vs Cal Game"
+location: "Campus Library"
+images: [file1, file2, file3] // Multiple image files (max 5)
 ```
 
 **Required Fields:** `title`, `description`, `price`, `category`
 **Optional Fields:** `contactMethod`, `course`, `event`, `location`
 
-**Categories:** `Textbooks`, `Electronics`, `Sports Tickets`, `Furniture`, `Clothing`, `Other`
+**Categories:** `textbooks`, `electronics`, `game-tickets`, `furniture`, `clothing`, `other`
+
+**📸 Image Requirements:**
+
+- **Required for:** `textbooks`, `electronics`, `furniture`, `clothing`, `other` (at least 1 image)
+- **Optional for:** `game-tickets` (images not required)
+- **Maximum:** 5 images per post
+- **File size limit:** 10MB per image
+- **Supported formats:** Images only (jpg, png, gif, etc.)
+- **Field name:** `images` (array of files)
+
+**📋 Category-Specific Fields:**
+
+| Category         | Image Required | Relevant Optional Fields | Purpose                                             |
+| ---------------- | -------------- | ------------------------ | --------------------------------------------------- |
+| **textbooks**    | ✅ Yes         | `course`, `location`     | Course name (e.g., "CS 106A"), pickup location      |
+| **game-tickets** | ❌ No          | `event`, `location`      | Event name (e.g., "Stanford vs Cal"), venue/section |
+| **electronics**  | ✅ Yes         | `location`               | Pickup location for meetup                          |
+| **furniture**    | ✅ Yes         | `location`               | Pickup location (important for large items)         |
+| **clothing**     | ✅ Yes         | `location`               | Pickup location for trying on                       |
+| **other**        | ✅ Yes         | `location`               | General pickup location                             |
+
+**🎯 Frontend Form Logic:**
+
+```javascript
+const getRelevantFields = (category) => {
+  switch (category) {
+    case "textbooks":
+      return ["course", "location"];
+    case "game-tickets":
+      return ["event", "location"];
+    case "electronics":
+    case "furniture":
+    case "clothing":
+    case "other":
+      return ["location"];
+    default:
+      return [];
+  }
+};
+
+const isImageRequired = (category) => {
+  return category !== "game-tickets";
+};
+```
 
 **Response (Success - 201):**
 
@@ -420,10 +474,13 @@ Create a new marketplace listing.
       "title": "MacBook Pro 2021",
       "description": "Excellent condition MacBook Pro, barely used. Perfect for computer science students!",
       "price": "1299.99",
-      "category": "Electronics",
+      "category": "electronics",
       "seller_id": 8,
       "university": "Stanford University",
-      "images": [],
+      "images": [
+        "post-1692123456789-abc123def.jpg",
+        "post-1692123456790-def456ghi.jpg"
+      ],
       "views": 0,
       "status": "active",
       "contact_method": "email",
@@ -446,6 +503,15 @@ Create a new marketplace listing.
 }
 ```
 
+**Response (Error - 400 - Missing Images):**
+
+```json
+{
+  "success": false,
+  "message": "At least one image is required for this category"
+}
+```
+
 ---
 
 ### 2. GET /api/posts
@@ -463,6 +529,8 @@ Get all marketplace posts from your university.
 - `status` (optional): Post status (default: "active")
 
 **Example:** `GET /api/posts?category=Electronics&search=macbook&page=2&limit=10`
+
+**⚠️ IMPORTANT:** This endpoint requires authentication and only shows posts from your university.
 
 **Response (Success - 200):**
 
@@ -744,20 +812,49 @@ Mark a post as sold (only by owner).
 
 ## 📋 Example Usage with cURL
 
-### Create a new post:
+### Create a new post with images:
 
 ```bash
 curl -X POST http://localhost:3001/api/posts \
-  -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "title": "Calculus Textbook",
-    "description": "Stewart Calculus 8th edition. Great condition.",
-    "price": 89.99,
-    "category": "Textbooks",
-    "contactMethod": "email",
-    "course": "MATH 41"
-  }'
+  -F "title=Calculus Textbook" \
+  -F "description=Stewart Calculus 8th edition. Great condition." \
+  -F "price=89.99" \
+  -F "category=textbooks" \
+  -F "contactMethod=email" \
+  -F "course=MATH 41" \
+  -F "images=@/path/to/image1.jpg" \
+  -F "images=@/path/to/image2.jpg"
+```
+
+### Create a Game Ticket post (no images required):
+
+```bash
+curl -X POST http://localhost:3001/api/posts \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "title=Stanford vs Cal Football Tickets" \
+  -F "description=Two tickets for the Big Game! Great seats." \
+  -F "price=150.00" \
+  -F "category=game-tickets" \
+  -F "contactMethod=email" \
+  -F "event=Stanford vs Cal Game" \
+  -F "location=Section 20, Row 15"
+```
+
+### Create an Electronics post with multiple images:
+
+```bash
+curl -X POST http://localhost:3001/api/posts \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "title=MacBook Pro 2021" \
+  -F "description=Excellent condition, includes charger." \
+  -F "price=1299.99" \
+  -F "category=electronics" \
+  -F "contactMethod=phone" \
+  -F "location=Engineering Quad" \
+  -F "images=@/path/to/macbook1.jpg" \
+  -F "images=@/path/to/macbook2.jpg" \
+  -F "images=@/path/to/macbook3.jpg"
 ```
 
 ### Get all posts from your university:
