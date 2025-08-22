@@ -1,7 +1,7 @@
 const { pool } = require("../config/database");
+const { uploadToS3, deleteFromS3 } = require("../config/s3");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 
 // Configure multer for image uploads
 const storage = multer.memoryStorage(); // Store in memory temporarily
@@ -61,13 +61,22 @@ const createPost = async (req, res) => {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
         const filename =
           "post-" + uniqueSuffix + path.extname(file.originalname);
-        const filepath = path.join(__dirname, "..", filename);
 
-        // Save file to disk
-        fs.writeFileSync(filepath, file.buffer);
-
-        // Store the filename (not full path) for the database
-        imageUrls.push(filename);
+        try {
+          // Upload to S3 instead of local storage
+          const s3Filename = await uploadToS3(
+            file.buffer,
+            filename,
+            file.mimetype
+          );
+          imageUrls.push(s3Filename);
+        } catch (error) {
+          console.error("Error uploading image to S3:", error);
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload image",
+          });
+        }
       }
     }
 

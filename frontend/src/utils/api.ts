@@ -46,12 +46,13 @@ const API_BASE_URL = "/api";
 const BACKEND_URL = "http://localhost:3001";
 
 export const getImageUrl = (filename: string): string => {
-  // If the filename is already a full URL (S3 URL), return it as-is
+  // If the filename is already a full URL (legacy), return it as-is
   if (filename.startsWith("http://") || filename.startsWith("https://")) {
     return filename;
   }
-  // Otherwise, construct the backend URL for local files
-  return `${BACKEND_URL}/images/${filename}`;  // ✅ Changed /uploads/ to /images/
+  
+  // All other files are S3 files - use the backend proxy
+  return `${BACKEND_URL}/s3-images/${filename}`;
 };
 
 export const getAuthToken = () => {
