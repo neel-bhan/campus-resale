@@ -42,16 +42,16 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
-const API_BASE_URL = "/api";
-const BACKEND_URL = "http://localhost:3001";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 export const getImageUrl = (filename: string): string => {
   // If the filename is already a full URL (legacy), return it as-is
   if (filename.startsWith("http://") || filename.startsWith("https://")) {
     return filename;
   }
-  
-  // All other files are S3 files - use the backend proxy
+
+  // All other files (including S3 filenames) go through the backend proxy
   return `${BACKEND_URL}/s3-images/${filename}`;
 };
 
@@ -192,6 +192,7 @@ export interface Post {
   course?: string;
   event?: string;
   location?: string;
+  event_date?: string; // New field for sports tickets
   created_at: string;
   updated_at: string;
   seller_name?: string;
@@ -208,6 +209,7 @@ export interface CreatePostRequest {
   course?: string;
   event?: string;
   location?: string;
+  eventDate?: string; // New field for sports tickets
 }
 
 export interface PostsResponse {

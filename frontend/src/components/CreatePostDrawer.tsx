@@ -29,6 +29,7 @@ export function CreatePostDrawer({
     course: "",
     event: "",
     location: "",
+    eventDate: "",
   });
 
   const categories = [
@@ -62,6 +63,7 @@ export function CreatePostDrawer({
         course: "",
         event: "",
         location: "",
+        eventDate: "",
       }));
     } else {
       setFormData((prev) => ({
@@ -95,6 +97,7 @@ export function CreatePostDrawer({
       course: "",
       event: "",
       location: "",
+      eventDate: "",
     });
     setSelectedImages([]);
     setError("");
@@ -131,6 +134,11 @@ export function CreatePostDrawer({
           setLoading(false);
           return;
         }
+        if (!formData.eventDate) {
+          setError("Event date is required for sports tickets");
+          setLoading(false);
+          return;
+        }
         if (!formData.location) {
           setError("Venue/Location is required for sports tickets");
           setLoading(false);
@@ -138,7 +146,7 @@ export function CreatePostDrawer({
         }
       }
 
-      // Images are required for most categories except game tickets
+      // Images are required for most categories except sports tickets
       if (
         (!selectedImages || selectedImages.length === 0) &&
         formData.category !== "game-tickets"
@@ -198,7 +206,7 @@ export function CreatePostDrawer({
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="border-gray-600 text-white hover:bg-gray-800"
+            className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 hover:border-gray-500"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -343,6 +351,21 @@ export function CreatePostDrawer({
                   </div>
 
                   <div>
+                    <Label htmlFor="eventDate" className="text-white">
+                      Event Date *
+                    </Label>
+                    <Input
+                      id="eventDate"
+                      name="eventDate"
+                      type="date"
+                      value={formData.eventDate}
+                      onChange={handleInputChange}
+                      className="mt-1 bg-gray-800 border-gray-600 text-white"
+                      required
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="location" className="text-white">
                       Venue/Location *
                     </Label>
@@ -449,7 +472,7 @@ export function CreatePostDrawer({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-teal-600 hover:bg-teal-700 text-white"
+              className="flex-1 bg-teal-600 hover:bg-teal-700 text-white border-teal-600 disabled:bg-teal-800 disabled:text-gray-300"
             >
               {loading ? "Creating..." : "Create Listing"}
             </Button>
@@ -457,7 +480,7 @@ export function CreatePostDrawer({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-gray-600 text-white hover:bg-gray-700"
+              className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 hover:border-gray-500"
             >
               Cancel
             </Button>

@@ -10,6 +10,7 @@ import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { Dashboard } from "./pages/Dashboard";
+import { PostsListingPage } from "./pages/PostsListingPage";
 import {
   setAuthToken,
   clearAuthToken,
@@ -87,6 +88,18 @@ function App() {
             user ? (
               <Layout user={user} onLogout={handleLogout}>
                 <Dashboard user={user} />
+              </Layout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/posts"
+          element={
+            user ? (
+              <Layout user={user} onLogout={handleLogout}>
+                <PostsListingPage />
               </Layout>
             ) : (
               <Navigate to="/login" replace />

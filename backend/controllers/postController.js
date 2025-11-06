@@ -33,6 +33,7 @@ const createPost = async (req, res) => {
       course,
       event,
       location,
+      eventDate,
     } = req.body;
 
     // Validation
@@ -97,8 +98,8 @@ const createPost = async (req, res) => {
 
     // Create new post with images
     const newPostQuery = await pool.query(
-      `INSERT INTO posts (title, description, price, category, seller_id, university, contact_method, course, event, location, images)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `INSERT INTO posts (title, description, price, category, seller_id, university, contact_method, course, event, location, images, event_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         title,
@@ -112,6 +113,7 @@ const createPost = async (req, res) => {
         event,
         location,
         imageUrls,
+        eventDate || null, // Only set for sports tickets
       ]
     );
 
@@ -196,7 +198,15 @@ const getAllPosts = async (req, res) => {
     const totalPosts = parseInt(totalResult.rows[0].total);
 
     // Add ordering and pagination
-    query += ` ORDER BY p.created_at DESC`;
+    // For sports tickets, sort by event_date (upcoming events first), then by created_at
+    // For other categories, sort by created_at
+    query += ` ORDER BY 
+      CASE 
+        WHEN p.category = 'Sports Tickets' AND p.event_date IS NOT NULL 
+        THEN p.event_date 
+        ELSE p.created_at 
+      END ASC,
+      p.created_at DESC`;
     query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     queryParams.push(parseInt(limit));
     queryParams.push((parseInt(page) - 1) * parseInt(limit));
@@ -313,6 +323,7 @@ const updatePost = async (req, res) => {
       course,
       event,
       location,
+      eventDate,
     } = req.body;
 
     // Check if user owns this post
@@ -333,8 +344,8 @@ const updatePost = async (req, res) => {
       `UPDATE posts 
        SET title = $1, description = $2, price = $3, category = $4, 
            contact_method = $5, course = $6, event = $7, location = $8,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $9 AND seller_id = $10
+           event_date = $9, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $10 AND seller_id = $11
        RETURNING *`,
       [
         title,
@@ -345,6 +356,7 @@ const updatePost = async (req, res) => {
         course,
         event,
         location,
+        eventDate || null,
         postId,
         userId,
       ]

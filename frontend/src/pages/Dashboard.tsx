@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAllPosts, type Post, getImageUrl } from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { CreatePostDrawer } from "@/components/CreatePostDrawer";
@@ -9,8 +10,10 @@ interface DashboardProps {
 }
 
 export function Dashboard({ user }: DashboardProps) {
+  const navigate = useNavigate();
   const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  const [sportsTickets, setSportsTickets] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
 
@@ -39,6 +42,27 @@ export function Dashboard({ user }: DashboardProps) {
               new Date(a.created_at).getTime()
           );
           setRecentPosts(sortedByDate.slice(0, 4));
+
+          // Filter and sort sports tickets by event date
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const sportsTicketPosts = posts
+            .filter((post) => post.category === "game-tickets")
+            .filter((post) => post.event_date) // Only show tickets with event dates
+            .filter((post) => {
+              // Only show future events (including today)
+              const eventDate = new Date(post.event_date!);
+              return eventDate >= today;
+            })
+            .sort((a, b) => {
+              // Sort by event date (earliest/closest first)
+              const dateA = new Date(a.event_date!).getTime();
+              const dateB = new Date(b.event_date!).getTime();
+              return dateA - dateB;
+            });
+
+          setSportsTickets(sportsTicketPosts.slice(0, 3));
         } else {
           console.error(
             "API Error:",
@@ -156,7 +180,10 @@ export function Dashboard({ user }: DashboardProps) {
                 </p>
               </div>
             </div>
-            <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white">
+            <Button
+              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white"
+              onClick={() => navigate("/posts?filter=sports-tickets")}
+            >
               Browse Tickets
             </Button>
           </div>
@@ -174,7 +201,10 @@ export function Dashboard({ user }: DashboardProps) {
                 </p>
               </div>
             </div>
-            <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white">
+            <Button
+              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white"
+              onClick={() => navigate("/posts?category=textbooks")}
+            >
               Find Textbooks
             </Button>
           </div>
@@ -187,7 +217,10 @@ export function Dashboard({ user }: DashboardProps) {
               <TrendingUp className="w-6 h-6 mr-2 text-teal-400" />
               Trending Now
             </h2>
-            <button className="text-teal-400 hover:text-teal-300 transition-colors">
+            <button
+              className="text-teal-400 hover:text-teal-300 transition-colors"
+              onClick={() => navigate("/posts?filter=trending")}
+            >
               View All
             </button>
           </div>
@@ -280,10 +313,13 @@ export function Dashboard({ user }: DashboardProps) {
         </div>
 
         {/* Recent Listings */}
-        <div>
+        <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Recent Listings</h2>
-            <button className="text-teal-400 hover:text-teal-300 transition-colors">
+            <button
+              className="text-teal-400 hover:text-teal-300 transition-colors"
+              onClick={() => navigate("/posts?filter=recent")}
+            >
               View All
             </button>
           </div>
@@ -363,6 +399,182 @@ export function Dashboard({ user }: DashboardProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+        {/* Upcoming Campus Events */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white">
+              Upcoming Campus Events
+            </h2>
+            <button
+              className="text-teal-400 hover:text-teal-300 transition-colors"
+              onClick={() => navigate("/posts?filter=sports-tickets")}
+            >
+              View Calendar
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {sportsTickets.length > 0 ? (
+              sportsTickets.map((ticket) => {
+                const eventDate = new Date(ticket.event_date!);
+                const month = eventDate.toLocaleDateString("en-US", {
+                  month: "short",
+                });
+                const day = eventDate.getDate();
+                const time = eventDate.toLocaleDateString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+
+                return (
+                  <div
+                    key={ticket.id}
+                    className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
+                  >
+                    <div className="flex items-start mb-4">
+                      <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
+                        <Ticket className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white mb-1">
+                          {ticket.event || ticket.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm">
+                          {ticket.category === "game-tickets"
+                            ? "Sports Event"
+                            : "Campus Event"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center text-gray-300">
+                        <span className="text-sm">
+                          {month} {day}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-gray-300">
+                        <span className="text-sm">{time}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-400">
+                        {ticket.views} tickets available
+                      </span>
+                      <button
+                        className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                        onClick={() => navigate("/posts?filter=sports-tickets")}
+                      >
+                        Find Tickets
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              // Default placeholder events when no sports tickets are available
+              <>
+                <div className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700">
+                  <div className="flex items-start mb-4">
+                    <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
+                      <Ticket className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-1">
+                        Stanford vs UCLA
+                      </h3>
+                      <p className="text-gray-400 text-sm">Football Game</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">Mar 18</span>
+                    </div>
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">3:30 PM</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      48 tickets available
+                    </span>
+                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                      Find Tickets
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700">
+                  <div className="flex items-start mb-4">
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                      <Ticket className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-1">
+                        Stanford vs USC
+                      </h3>
+                      <p className="text-gray-400 text-sm">Basketball Game</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">Mar 15</span>
+                    </div>
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">7:30 PM</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      32 tickets available
+                    </span>
+                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                      Find Tickets
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700">
+                  <div className="flex items-start mb-4">
+                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                      <Ticket className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-1">
+                        Spring Concert
+                      </h3>
+                      <p className="text-gray-400 text-sm">Campus Quad</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">Mar 25</span>
+                    </div>
+                    <div className="flex items-center text-gray-300">
+                      <span className="text-sm">6:00 PM</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      75 tickets available
+                    </span>
+                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                      Find Tickets
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
