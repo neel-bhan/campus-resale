@@ -369,3 +369,4 @@ export function CreatePost(){
     </div>
   );
 }
+// build trigger
