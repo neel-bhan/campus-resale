@@ -7,11 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Upload, X } from "lucide-react";
 
-interface CreatePostProps {
-  user: any;
-}
 
-export function CreatePost({  }: CreatePostProps) {
+
+export function CreatePost(){
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
