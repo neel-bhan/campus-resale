@@ -11,7 +11,7 @@ interface CreatePostProps {
   user: any;
 }
 
-export function CreatePost({ user: _user }: CreatePostProps) {
+export function CreatePost({  }: CreatePostProps) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
