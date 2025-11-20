@@ -30,15 +30,15 @@ export function HomePage() {
           <Button
             variant="outline"
             className="border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-black transition-colors bg-transparent"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/dashboard")}
           >
-            Log In
+            Dashboard
           </Button>
           <Button
             className="bg-teal-400 text-black hover:bg-teal-300 transition-colors"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/posts")}
           >
-            Sign Up
+            Browse Marketplace
           </Button>
         </div>
       </nav>
@@ -59,16 +59,17 @@ export function HomePage() {
             <Button
               size="lg"
               className="bg-teal-400 text-black hover:bg-teal-300 transition-colors px-8 py-4 text-lg font-semibold"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/dashboard")}
             >
-              Join Your Campus
+              Go to Dashboard
             </Button>
             <Button
               size="lg"
               variant="outline"
               className="border-gray-600 text-white hover:bg-gray-800 transition-colors px-8 py-4 text-lg bg-transparent"
+              onClick={() => navigate("/posts")}
             >
-              Learn More
+              Browse Marketplace
             </Button>
           </div>
         </div>

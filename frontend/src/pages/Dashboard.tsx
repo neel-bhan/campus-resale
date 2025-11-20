@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllPosts, type Post, getImageUrl } from "@/utils/api";
+import { type Post, getImageUrl } from "@/utils/api";
+import { mockPosts } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
 import { CreatePostDrawer } from "@/components/CreatePostDrawer";
 import { Plus, Ticket, BookOpen, TrendingUp, Eye } from "lucide-react";
@@ -14,71 +15,44 @@ export function Dashboard({ user }: DashboardProps) {
   const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [sportsTickets, setSportsTickets] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        // Get all posts first
-        const allPostsResponse = await getAllPosts({
-          limit: 50, // Get more posts to have enough for sorting
-          status: "active",
-        });
+    // Use mock data instead of API call
+    const posts = mockPosts;
 
-        console.log("API Response:", allPostsResponse); // Debug log
+    // Sort by views for trending (highest views first)
+    const sortedByViews = [...posts].sort((a, b) => b.views - a.views);
+    setTrendingPosts(sortedByViews.slice(0, 4));
 
-        if (allPostsResponse.data && allPostsResponse.data.posts) {
-          const posts = allPostsResponse.data.posts;
+    // Sort by creation date for recent (most recent first)
+    const sortedByDate = [...posts].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+    setRecentPosts(sortedByDate.slice(0, 4));
 
-          // Sort by views for trending (highest views first)
-          const sortedByViews = [...posts].sort((a, b) => b.views - a.views);
-          setTrendingPosts(sortedByViews.slice(0, 4));
+    // Filter and sort sports tickets by event date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-          // Sort by creation date for recent (most recent first)
-          const sortedByDate = [...posts].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          );
-          setRecentPosts(sortedByDate.slice(0, 4));
+    const sportsTicketPosts = posts
+      .filter((post) => post.category === "game-tickets")
+      .filter((post) => post.event_date) // Only show tickets with event dates
+      .filter((post) => {
+        // Only show future events (including today)
+        const eventDate = new Date(post.event_date!);
+        return eventDate >= today;
+      })
+      .sort((a, b) => {
+        // Sort by event date (earliest/closest first)
+        const dateA = new Date(a.event_date!).getTime();
+        const dateB = new Date(b.event_date!).getTime();
+        return dateA - dateB;
+      });
 
-          // Filter and sort sports tickets by event date
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const sportsTicketPosts = posts
-            .filter((post) => post.category === "game-tickets")
-            .filter((post) => post.event_date) // Only show tickets with event dates
-            .filter((post) => {
-              // Only show future events (including today)
-              const eventDate = new Date(post.event_date!);
-              return eventDate >= today;
-            })
-            .sort((a, b) => {
-              // Sort by event date (earliest/closest first)
-              const dateA = new Date(a.event_date!).getTime();
-              const dateB = new Date(b.event_date!).getTime();
-              return dateA - dateB;
-            });
-
-          setSportsTickets(sportsTicketPosts.slice(0, 3));
-        } else {
-          console.error(
-            "API Error:",
-            allPostsResponse.error ||
-              allPostsResponse.message ||
-              "Failed to fetch posts"
-          );
-        }
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
+    setSportsTickets(sportsTicketPosts.slice(0, 3));
   }, []);
 
   const formatPrice = (price: string) => {
@@ -109,17 +83,6 @@ export function Dashboard({ user }: DashboardProps) {
     };
     return colors[category as keyof typeof colors] || "bg-gray-500";
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-6 py-20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -584,8 +547,8 @@ export function Dashboard({ user }: DashboardProps) {
         isOpen={isCreateDrawerOpen}
         onClose={() => setIsCreateDrawerOpen(false)}
         onSuccess={() => {
-          // Refresh dashboard data when post is created
-          window.location.reload();
+          // In frontend-only mode, just close the drawer
+          setIsCreateDrawerOpen(false);
         }}
       />
     </div>

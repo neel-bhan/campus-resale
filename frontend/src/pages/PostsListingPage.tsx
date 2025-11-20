@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getAllPosts, type Post, getImageUrl } from "@/utils/api";
+import { type Post, getImageUrl } from "@/utils/api";
+import { mockPosts } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
 import {
   Eye,
@@ -68,30 +69,10 @@ export function PostsListingPage() {
   }, [category, sort, filter]);
 
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await getAllPosts({
-          limit: 100,
-          status: "active",
-        });
-
-        if (response.data && response.data.posts) {
-          setPosts(response.data.posts);
-        } else {
-          console.error(
-            "Failed to fetch posts:",
-            response.error || response.message
-          );
-        }
-      } catch (error) {
-        console.error("Error loading posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPosts();
+    // Use mock data instead of API call
+    setLoading(true);
+    setPosts(mockPosts);
+    setLoading(false);
   }, []);
 
   useEffect(() => {

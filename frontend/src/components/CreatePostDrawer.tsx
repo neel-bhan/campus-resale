@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createPost } from "@/utils/api";
 import type { CreatePostRequest } from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -156,28 +155,20 @@ export function CreatePostDrawer({
         return;
       }
 
-      // Create the post with images
-      const response = await createPost(
-        formData,
-        selectedImages.length > 0 ? selectedImages : undefined
-      );
+      // Frontend-only mode: Just show success message
+      // In production, this would call the API
+      console.log("Post would be created:", formData);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      if (response.data && response.data.post) {
-        console.log(
-          "Post created successfully with images:",
-          response.data.post
-        );
+      // Reset form and close drawer
+      resetForm();
+      onClose();
 
-        // Reset form and close drawer
-        resetForm();
-        onClose();
-
-        // Call success callback to refresh dashboard
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        setError(response.error || response.message || "Failed to create post");
+      // Call success callback
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (err) {
       console.error("Error creating post:", err);
