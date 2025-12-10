@@ -5,7 +5,7 @@ import { getPostImages } from "@/utils/postImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Upload } from "lucide-react";
+import { X } from "lucide-react";
 
 interface CreatePostDrawerProps {
   isOpen: boolean;
@@ -20,7 +20,6 @@ export function CreatePostDrawer({
 }: CreatePostDrawerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [formData, setFormData] = useState<CreatePostRequest>({
     title: "",
     description: "",
@@ -74,19 +73,6 @@ export function CreatePostDrawer({
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length + selectedImages.length > 5) {
-      setError("Maximum 5 images allowed");
-      return;
-    }
-    setSelectedImages((prev) => [...prev, ...files]);
-    setError("");
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const resetForm = () => {
     setFormData({
@@ -100,7 +86,6 @@ export function CreatePostDrawer({
       location: "",
       eventDate: "",
     });
-    setSelectedImages([]);
     setError("");
   };
 
@@ -147,15 +132,6 @@ export function CreatePostDrawer({
         }
       }
 
-      // Images are required for most categories except sports tickets
-      if (
-        (!selectedImages || selectedImages.length === 0) &&
-        formData.category !== "game-tickets"
-      ) {
-        setError("At least one image is required for this category");
-        setLoading(false);
-        return;
-      }
 
       // Since we can't upload images to Bucket API, use empty array
       // Images will be handled by getPostImages() when displaying
@@ -263,6 +239,7 @@ export function CreatePostDrawer({
               rows={3}
               className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               required
+              aria-label="Post description"
             />
           </div>
 
@@ -422,61 +399,6 @@ export function CreatePostDrawer({
                 />
               </div>
             )}
-
-          {/* Image Upload */}
-          <div>
-            <Label className="text-white">
-              Images{" "}
-              {formData.category === "game-tickets"
-                ? "(Optional, Max 5)"
-                : "(Required, Max 5)"}
-            </Label>
-            <div className="mt-2">
-              <label
-                htmlFor="images"
-                className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-750"
-              >
-                <div className="flex items-center">
-                  <Upload className="w-5 h-5 mr-2 text-gray-400" />
-                  <span className="text-sm text-gray-400">
-                    Click to upload images
-                  </span>
-                </div>
-                <input
-                  id="images"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-              </label>
-
-              {/* Selected Images Preview */}
-              {selectedImages.length > 0 && (
-                <div className="mt-3">
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedImages.map((file, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-16 object-cover rounded"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
-                        >
-                          <X className="w-3 h-3 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Error Message */}
           {error && (

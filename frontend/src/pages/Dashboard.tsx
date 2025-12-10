@@ -186,9 +186,9 @@ export function Dashboard({ user }: DashboardProps) {
                 <Plus className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-white">
                   Post an Item
-                </h3>
+                </h2>
                 <p className="text-gray-400 text-sm">
                   List something to sell on the marketplace
                 </p>
@@ -209,9 +209,9 @@ export function Dashboard({ user }: DashboardProps) {
                 <Ticket className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-white">
                   Game Tickets
-                </h3>
+                </h2>
                 <p className="text-gray-400 text-sm">
                   Find tickets for upcoming sports events
                 </p>
@@ -232,7 +232,7 @@ export function Dashboard({ user }: DashboardProps) {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">Textbooks</h3>
+                <h2 className="text-lg font-semibold text-white">Textbooks</h2>
                 <p className="text-gray-400 text-sm">
                   Find or sell course materials and books
                 </p>
@@ -257,6 +257,7 @@ export function Dashboard({ user }: DashboardProps) {
             <button
               className="text-teal-400 hover:text-teal-300 transition-colors"
               onClick={() => navigate("/posts?filter=trending")}
+              aria-label="View all trending posts"
             >
               View All
             </button>
@@ -268,6 +269,15 @@ export function Dashboard({ user }: DashboardProps) {
                 key={post.id}
                 className="bg-gray-800 rounded-xl overflow-hidden hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
                 onClick={() => navigate(`/posts?id=${post.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/posts?id=${post.id}`);
+                  }
+                }}
+                aria-label={`View ${post.title} - ${formatPrice(post.price)}`}
               >
                 {/* Image */}
                 <div className="h-48 bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center overflow-hidden">
@@ -276,7 +286,7 @@ export function Dashboard({ user }: DashboardProps) {
                     return images.length > 0 ? (
                       <img
                         src={images[0]}
-                        alt={post.title}
+                        alt={`${post.title} - ${post.category} item for sale`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           // Fallback to emoji if image fails to load
@@ -361,6 +371,7 @@ export function Dashboard({ user }: DashboardProps) {
             <button
               className="text-teal-400 hover:text-teal-300 transition-colors"
               onClick={() => navigate("/posts?filter=recent")}
+              aria-label="View all recent posts"
             >
               View All
             </button>
@@ -372,6 +383,15 @@ export function Dashboard({ user }: DashboardProps) {
                 key={post.id}
                 className="bg-gray-800 rounded-xl p-4 flex items-center hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
                 onClick={() => navigate(`/posts?id=${post.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/posts?id=${post.id}`);
+                  }
+                }}
+                aria-label={`View ${post.title} - ${formatPrice(post.price)}`}
               >
                 {/* Thumbnail */}
                 <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 overflow-hidden">
@@ -380,7 +400,7 @@ export function Dashboard({ user }: DashboardProps) {
                     return images.length > 0 ? (
                       <img
                         src={images[0]}
-                        alt={post.title}
+                        alt={`${post.title} - ${post.category} item for sale`}
                         className="w-full h-full object-cover rounded-lg"
                         onError={(e) => {
                           // Fallback to emoji if image fails to load
@@ -456,6 +476,7 @@ export function Dashboard({ user }: DashboardProps) {
             <button
               className="text-teal-400 hover:text-teal-300 transition-colors"
               onClick={() => navigate("/posts?filter=sports-tickets")}
+              aria-label="View sports tickets calendar"
             >
               View Calendar
             </button>

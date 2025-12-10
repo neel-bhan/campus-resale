@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { type Post } from "@/utils/api";
 import { getPostImages } from "@/utils/postImages";
 import { getAllPostsFromBucket } from "@/utils/bucketApi";
@@ -24,6 +24,7 @@ import {
 
 export function PostsListingPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -295,11 +296,12 @@ export function PostsListingPage() {
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
-              type="text"
+              type="search"
               placeholder="Search posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-teal-500 focus:outline-none"
+              aria-label="Search posts by title or description"
             />
           </div>
 
@@ -313,6 +315,7 @@ export function PostsListingPage() {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-teal-500 focus:outline-none min-w-[180px]"
+                aria-label="Filter by category"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -330,6 +333,7 @@ export function PostsListingPage() {
                     setSortBy("latest");
                   }}
                   className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  aria-label="Clear all filters"
                 >
                   Clear Filters
                 </button>
@@ -347,6 +351,7 @@ export function PostsListingPage() {
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-teal-500 focus:outline-none"
+                  aria-label="Sort posts by"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.id} value={option.id}>
@@ -367,11 +372,15 @@ export function PostsListingPage() {
                         ? "bg-teal-600 text-white"
                         : "text-gray-400 hover:text-white"
                     }`}
+                    aria-label="Grid view"
+                    aria-pressed={viewMode === "grid"}
                   >
-                    <Grid3X3 className="w-5 h-5" />
+                    <Grid3X3 className="w-5 h-5" aria-hidden="true" />
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
+                    aria-label="List view"
+                    aria-pressed={viewMode === "list"}
                     className={`p-2 rounded-r-lg transition-colors ${
                       viewMode === "list"
                         ? "bg-teal-600 text-white"
@@ -405,6 +414,16 @@ export function PostsListingPage() {
               <div
                 key={post.id}
                 className="bg-gray-800 rounded-xl overflow-hidden hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/posts?id=${post.id}`);
+                  }
+                }}
+                onClick={() => navigate(`/posts?id=${post.id}`)}
+                aria-label={`View ${post.title} - ${formatPrice(post.price)}`}
               >
                 {/* Image */}
                 <div className="h-48 bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center overflow-hidden">
@@ -413,7 +432,7 @@ export function PostsListingPage() {
                     return images.length > 0 ? (
                       <img
                         src={images[0]}
-                        alt={post.title}
+                        alt={`${post.title} - ${post.category} item for sale`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
@@ -514,6 +533,16 @@ export function PostsListingPage() {
               <div
                 key={post.id}
                 className="bg-gray-800 rounded-xl p-6 flex items-center hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/posts?id=${post.id}`);
+                  }
+                }}
+                onClick={() => navigate(`/posts?id=${post.id}`)}
+                aria-label={`View ${post.title} - ${formatPrice(post.price)}`}
               >
                 {/* Thumbnail */}
                 <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-600 rounded-lg flex items-center justify-center mr-6 flex-shrink-0 overflow-hidden">
@@ -522,7 +551,7 @@ export function PostsListingPage() {
                     return images.length > 0 ? (
                       <img
                         src={images[0]}
-                        alt={post.title}
+                        alt={`${post.title} - ${post.category} item for sale`}
                         className="w-full h-full object-cover rounded-lg"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
