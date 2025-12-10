@@ -494,6 +494,20 @@ export function PostsListingPage() {
                     {post.description}
                   </p>
 
+                  {/* Contact Information */}
+                  {(post.seller_email || post.seller_phone) && (
+                    <div className="mb-3 text-xs text-gray-400">
+                      <div className="flex flex-col gap-1">
+                        {post.seller_email && (
+                          <div>📧 {post.seller_email}</div>
+                        )}
+                        {post.seller_phone && (
+                          <div>📱 {post.seller_phone}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Event Date for Sports Tickets */}
                   {post.category === "game-tickets" && post.event_date && (
                     <div className="flex items-center text-teal-400 text-sm mb-3">
@@ -625,6 +639,14 @@ export function PostsListingPage() {
                       <p className="text-gray-400 text-sm mb-2 line-clamp-2">
                         {post.description}
                       </p>
+
+                      {/* Contact Information */}
+                      {(post.seller_email || post.seller_phone) && (
+                        <div className="mb-2 text-xs text-gray-400">
+                          {post.seller_email && <span className="mr-3">📧 {post.seller_email}</span>}
+                          {post.seller_phone && <span>📱 {post.seller_phone}</span>}
+                        </div>
+                      )}
 
                       <div className="flex items-center text-xs text-gray-500">
                         <Eye className="w-3 h-3 mr-1" />

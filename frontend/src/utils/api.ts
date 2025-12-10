@@ -206,6 +206,8 @@ export interface CreatePostRequest {
   price: number;
   category: string;
   contactMethod?: string;
+  contactEmail?: string;
+  contactPhone?: string;
   course?: string;
   event?: string;
   location?: string;

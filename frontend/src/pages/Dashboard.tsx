@@ -345,6 +345,20 @@ export function Dashboard({ user }: DashboardProps) {
                     {post.description}
                   </p>
 
+                  {/* Contact Information */}
+                  {(post.seller_email || post.seller_phone) && (
+                    <div className="mb-3 text-xs text-gray-400">
+                      <div className="flex flex-col gap-1">
+                        {post.seller_email && (
+                          <div>📧 {post.seller_email}</div>
+                        )}
+                        {post.seller_phone && (
+                          <div>📱 {post.seller_phone}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 flex items-center">
                       <Eye className="w-3 h-3 mr-1" />
@@ -449,6 +463,14 @@ export function Dashboard({ user }: DashboardProps) {
                   <p className="text-gray-400 text-sm mb-2 line-clamp-1">
                     {post.description}
                   </p>
+
+                  {/* Contact Information */}
+                  {(post.seller_email || post.seller_phone) && (
+                    <div className="mb-2 text-xs text-gray-400">
+                      {post.seller_email && <span className="mr-3">📧 {post.seller_email}</span>}
+                      {post.seller_phone && <span>📱 {post.seller_phone}</span>}
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between">
                     <span

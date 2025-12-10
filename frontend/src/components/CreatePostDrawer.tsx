@@ -25,6 +25,8 @@ export function CreatePostDrawer({
     price: 0,
     category: "",
     contactMethod: "email",
+    contactEmail: "",
+    contactPhone: "",
     course: "",
     event: "",
     location: "",
@@ -80,6 +82,8 @@ export function CreatePostDrawer({
       price: 0,
       category: "",
       contactMethod: "email",
+      contactEmail: "",
+      contactPhone: "",
       course: "",
       event: "",
       location: "",
@@ -104,6 +108,25 @@ export function CreatePostDrawer({
         setError("Please fill in all required fields");
         setLoading(false);
         return;
+      }
+
+      // Contact validation based on contactMethod
+      if (formData.contactMethod === "email" && !formData.contactEmail) {
+        setError("Email is required when contact method is email");
+        setLoading(false);
+        return;
+      }
+      if (formData.contactMethod === "phone" && !formData.contactPhone) {
+        setError("Phone number is required when contact method is phone");
+        setLoading(false);
+        return;
+      }
+      if (formData.contactMethod === "both") {
+        if (!formData.contactEmail || !formData.contactPhone) {
+          setError("Both email and phone are required when contact method is both");
+          setLoading(false);
+          return;
+        }
       }
 
       // Category-specific validation
@@ -150,7 +173,8 @@ export function CreatePostDrawer({
         images: images, // Empty - images assigned by getPostImages when displaying
         seller_id: 1, // Placeholder - not using auth
         seller_name: "Student",
-        seller_email: "student@university.edu",
+        seller_email: formData.contactEmail || null,
+        seller_phone: formData.contactPhone || null,
         university: "University of Wisconsin-Madison",
       };
 
@@ -287,7 +311,7 @@ export function CreatePostDrawer({
           {/* Contact Method */}
           <div>
             <Label htmlFor="contactMethod" className="text-white">
-              Contact Method
+              Contact Method *
             </Label>
             <select
               id="contactMethod"
@@ -303,6 +327,44 @@ export function CreatePostDrawer({
               ))}
             </select>
           </div>
+
+          {/* Contact Email */}
+          {(formData.contactMethod === "email" || formData.contactMethod === "both") && (
+            <div>
+              <Label htmlFor="contactEmail" className="text-white">
+                Email Address *
+              </Label>
+              <Input
+                id="contactEmail"
+                name="contactEmail"
+                type="email"
+                value={formData.contactEmail}
+                onChange={handleInputChange}
+                placeholder="your.email@university.edu"
+                className="mt-1 bg-gray-800 border-gray-600 text-white"
+                required
+              />
+            </div>
+          )}
+
+          {/* Contact Phone */}
+          {(formData.contactMethod === "phone" || formData.contactMethod === "both") && (
+            <div>
+              <Label htmlFor="contactPhone" className="text-white">
+                Phone Number *
+              </Label>
+              <Input
+                id="contactPhone"
+                name="contactPhone"
+                type="tel"
+                value={formData.contactPhone}
+                onChange={handleInputChange}
+                placeholder="(555) 123-4567"
+                className="mt-1 bg-gray-800 border-gray-600 text-white"
+                required
+              />
+            </div>
+          )}
 
           {/* Optional Fields - Show based on category */}
           {(formData.category === "textbooks" ||
