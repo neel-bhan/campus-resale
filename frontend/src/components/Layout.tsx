@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
   children: ReactNode;
@@ -7,19 +8,46 @@ interface LayoutProps {
 }
 
 export function Layout({ children, user, onLogout }: LayoutProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <header className="border-b border-gray-800 bg-black">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold">
+          <button
+            onClick={() => navigate("/")}
+            className="text-xl font-bold hover:opacity-80 transition-opacity cursor-pointer"
+          >
             <span className="text-white">Campus</span>
             <span className="text-teal-400">Resale</span>
-          </div>
+          </button>
+
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => navigate("/")}
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => navigate("/posts")}
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Marketplace
+            </button>
+          </nav>
 
           {user && (
             <div className="flex items-center gap-4">
-              <span className="text-gray-300">Welcome, {user?.name}!</span>
+              <span className="text-gray-300 hidden sm:inline">Welcome, {user?.name}!</span>
               <button
                 onClick={onLogout}
                 className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-300 transition-colors"
@@ -38,10 +66,13 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
       <footer className="border-t border-gray-800 py-8 bg-black">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-xl font-bold mb-4 md:mb-0">
+            <button
+              onClick={() => navigate("/")}
+              className="text-xl font-bold mb-4 md:mb-0 hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <span className="text-white">Campus</span>
               <span className="text-teal-400">Resale</span>
-            </div>
+            </button>
             <div className="text-gray-400 text-sm">
               © 2025 CampusResale. All rights reserved.
             </div>
