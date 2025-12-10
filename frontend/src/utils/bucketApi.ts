@@ -65,7 +65,7 @@ export async function addPostToBucket(postData: any): Promise<any> {
       status: postData.status || "active",
     };
 
-    const response = await bucketApiRequest("POST", COLLECTION_NAME, postWithMetadata);
+    await bucketApiRequest("POST", COLLECTION_NAME, postWithMetadata);
     
     // Bucket API POST returns the created item in the response
     // The API generates its own UUID for the item
@@ -121,7 +121,7 @@ export async function updatePostInBucket(postId: string, postData: any): Promise
 export async function deletePostFromBucket(postId: string): Promise<any> {
   try {
     // Bucket API DELETE endpoint
-    const response = await bucketApiRequest("DELETE", `${COLLECTION_NAME}/${postId}`);
+    await bucketApiRequest("DELETE", `${COLLECTION_NAME}/${postId}`);
     return {
       success: true,
     };

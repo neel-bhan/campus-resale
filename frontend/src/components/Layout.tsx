@@ -7,7 +7,7 @@ interface LayoutProps {
   onLogout?: () => void;
 }
 
-export function Layout({ children, user, onLogout }: LayoutProps) {
+export function Layout({ children, user: _user, onLogout: _onLogout }: LayoutProps) {
   const navigate = useNavigate();
 
   return (

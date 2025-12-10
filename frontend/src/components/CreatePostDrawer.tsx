@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { CreatePostRequest } from "@/utils/api";
 import { addPostToBucket } from "@/utils/bucketApi";
-import { getPostImages } from "@/utils/postImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
