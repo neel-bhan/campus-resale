@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { type Post, getImageUrl } from "@/utils/api";
+import { type Post } from "@/utils/api";
 import { mockPosts } from "@/utils/mockData";
+import { getPostImages } from "@/utils/postImages";
 import { Button } from "@/components/ui/button";
 import { CreatePostDrawer } from "@/components/CreatePostDrawer";
 import { Plus, Ticket, BookOpen, TrendingUp, Eye } from "lucide-react";
@@ -193,18 +194,21 @@ export function Dashboard({ user }: DashboardProps) {
               <div
                 key={post.id}
                 className="bg-gray-800 rounded-xl overflow-hidden hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
+                onClick={() => navigate(`/posts?id=${post.id}`)}
               >
                 {/* Image */}
                 <div className="h-48 bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center overflow-hidden">
-                  {post.images && post.images.length > 0 ? (
-                    <img
-                      src={getImageUrl(post.images[0])}
-                      alt={post.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to emoji if image fails to load
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement!.innerHTML = `
+                  {(() => {
+                    const images = getPostImages(post);
+                    return images.length > 0 ? (
+                      <img
+                        src={images[0]}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to emoji if image fails to load
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML = `
                           <div class="text-4xl">
                             ${
                               post.category === "game-tickets"
@@ -223,16 +227,17 @@ export function Dashboard({ user }: DashboardProps) {
                         `;
                       }}
                     />
-                  ) : (
-                    <div className="text-4xl">
-                      {post.category === "game-tickets" && "🎫"}
-                      {post.category === "textbooks" && "📚"}
-                      {post.category === "electronics" && "💻"}
-                      {post.category === "furniture" && "🪑"}
-                      {post.category === "clothing" && "👕"}
-                      {post.category === "other" && "📦"}
-                    </div>
-                  )}
+                    ) : (
+                      <div className="text-4xl">
+                        {post.category === "game-tickets" && "🎫"}
+                        {post.category === "textbooks" && "📚"}
+                        {post.category === "electronics" && "💻"}
+                        {post.category === "furniture" && "🪑"}
+                        {post.category === "clothing" && "👕"}
+                        {post.category === "other" && "📦"}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="p-4">
@@ -265,6 +270,7 @@ export function Dashboard({ user }: DashboardProps) {
                     <Button
                       size="sm"
                       className="bg-teal-600 hover:bg-teal-700 text-xs"
+                      onClick={() => navigate(`/posts?id=${post.id}`)}
                     >
                       View
                     </Button>
@@ -292,18 +298,21 @@ export function Dashboard({ user }: DashboardProps) {
               <div
                 key={post.id}
                 className="bg-gray-800 rounded-xl p-4 flex items-center hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700"
+                onClick={() => navigate(`/posts?id=${post.id}`)}
               >
                 {/* Thumbnail */}
                 <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 overflow-hidden">
-                  {post.images && post.images.length > 0 ? (
-                    <img
-                      src={getImageUrl(post.images[0])}
-                      alt={post.title}
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        // Fallback to emoji if image fails to load
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement!.innerHTML = `
+                  {(() => {
+                    const images = getPostImages(post);
+                    return images.length > 0 ? (
+                      <img
+                        src={images[0]}
+                        alt={post.title}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          // Fallback to emoji if image fails to load
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML = `
                           <div class="text-2xl">
                             ${
                               post.category === "game-tickets"
@@ -320,18 +329,19 @@ export function Dashboard({ user }: DashboardProps) {
                             }
                           </div>
                         `;
-                      }}
-                    />
-                  ) : (
-                    <div className="text-2xl">
-                      {post.category === "game-tickets" && "🎫"}
-                      {post.category === "textbooks" && "📚"}
-                      {post.category === "electronics" && "💻"}
-                      {post.category === "furniture" && "🪑"}
-                      {post.category === "clothing" && "👕"}
-                      {post.category === "other" && "📦"}
-                    </div>
-                  )}
+                        }}
+                      />
+                    ) : (
+                      <div className="text-2xl">
+                        {post.category === "game-tickets" && "🎫"}
+                        {post.category === "textbooks" && "📚"}
+                        {post.category === "electronics" && "💻"}
+                        {post.category === "furniture" && "🪑"}
+                        {post.category === "clothing" && "👕"}
+                        {post.category === "other" && "📦"}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Content */}
@@ -467,7 +477,10 @@ export function Dashboard({ user }: DashboardProps) {
                     <span className="text-sm text-gray-400">
                       48 tickets available
                     </span>
-                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    <button 
+                      className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                      onClick={() => navigate("/posts?filter=sports-tickets")}
+                    >
                       Find Tickets
                     </button>
                   </div>
@@ -499,7 +512,10 @@ export function Dashboard({ user }: DashboardProps) {
                     <span className="text-sm text-gray-400">
                       32 tickets available
                     </span>
-                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    <button 
+                      className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                      onClick={() => navigate("/posts?filter=sports-tickets")}
+                    >
                       Find Tickets
                     </button>
                   </div>
@@ -531,7 +547,10 @@ export function Dashboard({ user }: DashboardProps) {
                     <span className="text-sm text-gray-400">
                       75 tickets available
                     </span>
-                    <button className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    <button 
+                      className="bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                      onClick={() => navigate("/posts?filter=sports-tickets")}
+                    >
                       Find Tickets
                     </button>
                   </div>

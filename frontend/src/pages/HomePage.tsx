@@ -14,14 +14,28 @@ export function HomePage() {
             <span className="text-teal-400">Resale</span>
           </div>
           <div className="hidden md:flex items-center space-x-8 text-gray-300">
-            <button className="hover:text-white transition-colors">Home</button>
-            <button className="hover:text-white transition-colors">
+            <button 
+              onClick={() => navigate("/")}
+              className="hover:text-white transition-colors"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => navigate("/posts?filter=sports-tickets")}
+              className="hover:text-white transition-colors"
+            >
               Sports Tickets
             </button>
-            <button className="hover:text-white transition-colors">
+            <button 
+              onClick={() => navigate("/posts?category=textbooks")}
+              className="hover:text-white transition-colors"
+            >
               Textbooks
             </button>
-            <button className="hover:text-white transition-colors">
+            <button 
+              onClick={() => navigate("/posts")}
+              className="hover:text-white transition-colors"
+            >
               Marketplace
             </button>
           </div>
@@ -35,7 +49,7 @@ export function HomePage() {
             Dashboard
           </Button>
           <Button
-            className="bg-teal-400 text-black hover:bg-teal-300 transition-colors"
+            className="bg-teal-400 text-black hover:bg-teal-300 hover:text-black transition-colors"
             onClick={() => navigate("/posts")}
           >
             Browse Marketplace
@@ -61,12 +75,12 @@ export function HomePage() {
               className="bg-teal-400 text-black hover:bg-teal-300 transition-colors px-8 py-4 text-lg font-semibold"
               onClick={() => navigate("/dashboard")}
             >
-              Go to Dashboard
+              Dashboard
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-gray-600 text-white hover:bg-gray-800 transition-colors px-8 py-4 text-lg bg-transparent"
+              className="border-gray-600 text-white hover:bg-gray-700 hover:text-white transition-colors px-8 py-4 text-lg bg-transparent"
               onClick={() => navigate("/posts")}
             >
               Browse Marketplace

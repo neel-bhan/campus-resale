@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { type Post, getImageUrl } from "@/utils/api";
+import { type Post } from "@/utils/api";
+import { getPostImages } from "@/utils/postImages";
 import { mockPosts } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
 import {
@@ -358,61 +359,49 @@ export function PostsListingPage() {
               >
                 {/* Image */}
                 <div className="h-48 bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center overflow-hidden">
-                  {post.images && post.images.length > 0 ? (
-                    <img
-                      src={getImageUrl(post.images[0])}
-                      alt={post.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement!.innerHTML = `
+                  {(() => {
+                    const images = getPostImages(post);
+                    return images.length > 0 ? (
+                      <img
+                        src={images[0]}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML = `
                           <div class="w-full h-full flex items-center justify-center">
-                            ${
-                              post.category === "game-tickets"
-                                ? `<img src="${getImageUrl(
-                                    "Uwmadison.png"
-                                  )}" alt="UW Madison" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\\"text-4xl\\">🎫</div>'" />`
-                                : `<div class="text-4xl">
-                                    ${
-                                      post.category === "textbooks"
-                                        ? "📚"
-                                        : post.category === "electronics"
-                                        ? "💻"
-                                        : post.category === "furniture"
-                                        ? "🪑"
-                                        : post.category === "clothing"
-                                        ? "👕"
-                                        : "📦"
-                                    }
-                                  </div>`
-                            }
+                            <div class="text-4xl">
+                              ${
+                                post.category === "textbooks"
+                                  ? "📚"
+                                  : post.category === "electronics"
+                                  ? "💻"
+                                  : post.category === "furniture"
+                                  ? "🪑"
+                                  : post.category === "clothing"
+                                  ? "👕"
+                                  : post.category === "game-tickets"
+                                  ? "🎫"
+                                  : "📦"
+                              }
+                            </div>
                           </div>
                         `;
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      {post.category === "game-tickets" ? (
-                        <img
-                          src={getImageUrl("Uwmadison.png")}
-                          alt="UW Madison"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.outerHTML =
-                              '<div class="text-4xl">🎫</div>';
-                          }}
-                        />
-                      ) : (
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
                         <div className="text-4xl">
                           {post.category === "textbooks" && "📚"}
                           {post.category === "electronics" && "💻"}
                           {post.category === "furniture" && "🪑"}
                           {post.category === "clothing" && "👕"}
+                          {post.category === "game-tickets" && "🎫"}
                           {post.category === "other" && "📦"}
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="p-4">
@@ -479,61 +468,49 @@ export function PostsListingPage() {
               >
                 {/* Thumbnail */}
                 <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-600 rounded-lg flex items-center justify-center mr-6 flex-shrink-0 overflow-hidden">
-                  {post.images && post.images.length > 0 ? (
-                    <img
-                      src={getImageUrl(post.images[0])}
-                      alt={post.title}
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement!.innerHTML = `
+                  {(() => {
+                    const images = getPostImages(post);
+                    return images.length > 0 ? (
+                      <img
+                        src={images[0]}
+                        alt={post.title}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML = `
                           <div class="w-full h-full flex items-center justify-center">
-                            ${
-                              post.category === "game-tickets"
-                                ? `<img src="${getImageUrl(
-                                    "Uwmadison.png"
-                                  )}" alt="UW Madison" class="w-full h-full object-cover rounded-lg" onerror="this.outerHTML='<div class=\\"text-2xl\\">🎫</div>'" />`
-                                : `<div class="text-2xl">
-                                    ${
-                                      post.category === "textbooks"
-                                        ? "📚"
-                                        : post.category === "electronics"
-                                        ? "💻"
-                                        : post.category === "furniture"
-                                        ? "🪑"
-                                        : post.category === "clothing"
-                                        ? "👕"
-                                        : "📦"
-                                    }
-                                  </div>`
-                            }
+                            <div class="text-2xl">
+                              ${
+                                post.category === "textbooks"
+                                  ? "📚"
+                                  : post.category === "electronics"
+                                  ? "💻"
+                                  : post.category === "furniture"
+                                  ? "🪑"
+                                  : post.category === "clothing"
+                                  ? "👕"
+                                  : post.category === "game-tickets"
+                                  ? "🎫"
+                                  : "📦"
+                              }
+                            </div>
                           </div>
                         `;
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      {post.category === "game-tickets" ? (
-                        <img
-                          src={getImageUrl("Uwmadison.png")}
-                          alt="UW Madison"
-                          className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            e.currentTarget.outerHTML =
-                              '<div class="text-2xl">🎫</div>';
-                          }}
-                        />
-                      ) : (
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
                         <div className="text-2xl">
                           {post.category === "textbooks" && "📚"}
                           {post.category === "electronics" && "💻"}
                           {post.category === "furniture" && "🪑"}
                           {post.category === "clothing" && "👕"}
+                          {post.category === "game-tickets" && "🎫"}
                           {post.category === "other" && "📦"}
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Content */}

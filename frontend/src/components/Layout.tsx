@@ -45,17 +45,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
             </button>
           </nav>
 
-          {user && (
-            <div className="flex items-center gap-4">
-              <span className="text-gray-300 hidden sm:inline">Welcome, {user?.name}!</span>
-              <button
-                onClick={onLogout}
-                className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-300 transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
-          )}
         </div>
       </header>
 
