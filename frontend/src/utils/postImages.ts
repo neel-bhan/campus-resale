@@ -23,9 +23,10 @@ export function getPostImages(post: { title: string; category: string }): string
     return ["/images/ipad1.jpeg"];
   }
 
-  // Electronics (default)
+  // Electronics (default) - return empty to show emoji
+  // Only return images for very specific matches above
   if (category.includes("electronics")) {
-    return ["/images/ipad1.jpeg", "/images/ipad2.jpeg"];
+    return []; // Show emoji instead
   }
 
   // Calculus/Math textbooks
@@ -43,9 +44,10 @@ export function getPostImages(post: { title: string; category: string }): string
     return ["/images/organic_chemistry.jpg"];
   }
 
-  // Textbooks (default)
+  // Textbooks (default) - return empty to show emoji
+  // Only return images for very specific matches above
   if (category.includes("textbook") || category.includes("textbooks")) {
-    return ["/images/calculus_textbook.jpeg"];
+    return []; // Show emoji instead
   }
 
   // Chair/Furniture posts
@@ -73,9 +75,10 @@ export function getPostImages(post: { title: string; category: string }): string
     return ["/images/spring_concert.png"];
   }
 
-  // Sports tickets (default)
+  // Sports tickets (default) - return empty to show emoji
+  // Only return images for very specific matches above
   if (category.includes("sports") || category.includes("game-tickets") || category.includes("ticket")) {
-    return ["/images/stanford_ucla.jpg", "/images/stanford_usc.jpeg"];
+    return []; // Show emoji instead
   }
 
   // Nike/Shoes/Clothing posts
@@ -83,9 +86,10 @@ export function getPostImages(post: { title: string; category: string }): string
     return ["/images/nike_shoes.jpg"];
   }
 
-  // Clothing (default)
+  // Clothing (default) - return empty to show emoji
+  // Only return images for very specific matches above
   if (category.includes("clothing")) {
-    return ["/images/nike_shoes.jpg"];
+    return []; // Show emoji instead
   }
 
   // No match - return empty array (will show emoji fallback)

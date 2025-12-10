@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Post } from "@/utils/api";
 import { mockPosts } from "@/utils/mockData";
+import { getAllPostsFromBucket } from "@/utils/bucketApi";
 import { getPostImages } from "@/utils/postImages";
 import { Button } from "@/components/ui/button";
 import { CreatePostDrawer } from "@/components/CreatePostDrawer";
@@ -17,44 +18,116 @@ export function Dashboard({ user }: DashboardProps) {
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [sportsTickets, setSportsTickets] = useState<Post[]>([]);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    // Use mock data instead of API call
-    const posts = mockPosts;
+    // Load posts from Bucket API, fallback to mock data
+    const loadPosts = async () => {
+      try {
+        const bucketPosts = await getAllPostsFromBucket();
+        // Transform Bucket API posts to match Post interface
+        const transformedPosts: Post[] = bucketPosts.map((p: any) => ({
+          id: parseInt(p.id?.replace(/\D/g, "") || Date.now().toString()),
+          title: p.title,
+          description: p.description,
+          price: p.price,
+          category: p.category,
+          seller_id: p.seller_id || 1,
+          university: p.university || "University of Wisconsin-Madison",
+          images: p.images || [],
+          views: p.views || 0,
+          status: p.status || "active",
+          contact_method: p.contact_method,
+          course: p.course,
+          event: p.event,
+          location: p.location,
+          event_date: p.event_date,
+          created_at: p.created_at || new Date().toISOString(),
+          updated_at: p.updated_at || new Date().toISOString(),
+          seller_name: p.seller_name,
+          seller_email: p.seller_email,
+        }));
 
-    // Sort by views for trending (highest views first)
-    const sortedByViews = [...posts].sort((a, b) => b.views - a.views);
-    setTrendingPosts(sortedByViews.slice(0, 4));
+        // Combine Bucket API posts with mock posts (premade listings)
+        const posts = [...mockPosts, ...transformedPosts];
 
-    // Sort by creation date for recent (most recent first)
-    const sortedByDate = [...posts].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-    );
-    setRecentPosts(sortedByDate.slice(0, 4));
+        // Sort by views for trending (highest views first)
+        const sortedByViews = [...posts].sort((a, b) => b.views - a.views);
+        setTrendingPosts(sortedByViews.slice(0, 4));
 
-    // Filter and sort sports tickets by event date
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+        // Sort by creation date for recent (most recent first)
+        const sortedByDate = [...posts].sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        );
+        setRecentPosts(sortedByDate.slice(0, 4));
 
-    const sportsTicketPosts = posts
-      .filter((post) => post.category === "game-tickets")
-      .filter((post) => post.event_date) // Only show tickets with event dates
-      .filter((post) => {
-        // Only show future events (including today)
-        const eventDate = new Date(post.event_date!);
-        return eventDate >= today;
-      })
-      .sort((a, b) => {
-        // Sort by event date (earliest/closest first)
-        const dateA = new Date(a.event_date!).getTime();
-        const dateB = new Date(b.event_date!).getTime();
-        return dateA - dateB;
-      });
+        // Filter and sort sports tickets by event date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-    setSportsTickets(sportsTicketPosts.slice(0, 3));
-  }, []);
+        const sportsTicketPosts = posts
+          .filter((post) => post.category === "game-tickets")
+          .filter((post) => post.event_date) // Only show tickets with event dates
+          .filter((post) => {
+            // Only show future events (including today)
+            const eventDate = new Date(post.event_date!);
+            return eventDate >= today;
+          })
+          .sort((a, b) => {
+            // Sort by event date (earliest/closest first)
+            const dateA = new Date(a.event_date!).getTime();
+            const dateB = new Date(b.event_date!).getTime();
+            return dateA - dateB;
+          });
+
+        setSportsTickets(sportsTicketPosts.slice(0, 3));
+      } catch (error) {
+        console.error("Error loading posts:", error);
+        // Fallback to mock data on error
+        const posts = mockPosts;
+        
+        const sortedByViews = [...posts].sort((a, b) => b.views - a.views);
+        setTrendingPosts(sortedByViews.slice(0, 4));
+
+        const sortedByDate = [...posts].sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        );
+        setRecentPosts(sortedByDate.slice(0, 4));
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const sportsTicketPosts = posts
+          .filter((post) => post.category === "game-tickets")
+          .filter((post) => post.event_date)
+          .filter((post) => {
+            const eventDate = new Date(post.event_date!);
+            return eventDate >= today;
+          })
+          .sort((a, b) => {
+            const dateA = new Date(a.event_date!).getTime();
+            const dateB = new Date(b.event_date!).getTime();
+            return dateA - dateB;
+          });
+        setSportsTickets(sportsTicketPosts.slice(0, 3));
+      }
+    };
+
+    loadPosts();
+
+    // Listen for post creation events
+    const handlePostCreated = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
+    window.addEventListener("postCreated", handlePostCreated);
+    return () => {
+      window.removeEventListener("postCreated", handlePostCreated);
+    };
+  }, [refreshKey]);
 
   const formatPrice = (price: string) => {
     return `$${parseFloat(price).toFixed(0)}`;
@@ -566,7 +639,8 @@ export function Dashboard({ user }: DashboardProps) {
         isOpen={isCreateDrawerOpen}
         onClose={() => setIsCreateDrawerOpen(false)}
         onSuccess={() => {
-          // In frontend-only mode, just close the drawer
+          // Refresh posts after creating a new one
+          setRefreshKey(prev => prev + 1);
           setIsCreateDrawerOpen(false);
         }}
       />

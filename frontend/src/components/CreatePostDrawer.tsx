@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { CreatePostRequest } from "@/utils/api";
+import { addPostToBucket } from "@/utils/bucketApi";
+import { getPostImages } from "@/utils/postImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,20 +157,45 @@ export function CreatePostDrawer({
         return;
       }
 
-      // Frontend-only mode: Just show success message
-      // In production, this would call the API
-      console.log("Post would be created:", formData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Since we can't upload images to Bucket API, use empty array
+      // Images will be handled by getPostImages() when displaying
+      const images: string[] = [];
 
-      // Reset form and close drawer
-      resetForm();
-      onClose();
+      // Prepare post data for Bucket API
+      const postData = {
+        title: formData.title,
+        description: formData.description,
+        price: formData.price.toString(),
+        category: formData.category,
+        contact_method: formData.contactMethod || "email",
+        course: formData.course || null,
+        event: formData.event || null,
+        location: formData.location || null,
+        event_date: formData.eventDate || null,
+        images: images, // Empty - images assigned by getPostImages when displaying
+        seller_id: 1, // Placeholder - not using auth
+        seller_name: "Student",
+        seller_email: "student@university.edu",
+        university: "University of Wisconsin-Madison",
+      };
 
-      // Call success callback
-      if (onSuccess) {
-        onSuccess();
+      // Create post using Bucket API
+      const response = await addPostToBucket(postData);
+
+      if (response.success) {
+        // Reset form and close drawer
+        resetForm();
+        onClose();
+
+        // Dispatch custom event to refresh all views
+        window.dispatchEvent(new CustomEvent("postCreated"));
+
+        // Call success callback to refresh the list
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        setError(response.error || "Failed to create post. Please try again.");
       }
     } catch (err) {
       console.error("Error creating post:", err);

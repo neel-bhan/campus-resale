@@ -185,9 +185,6 @@ export function HomePage() {
               <span className="text-white">Campus</span>
               <span className="text-teal-400">Resale</span>
             </div>
-            <div className="text-gray-400 text-sm">
-              © 2025 CampusResale. All rights reserved.
-            </div>
           </div>
         </div>
       </footer>

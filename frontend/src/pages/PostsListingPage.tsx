@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { type Post } from "@/utils/api";
 import { getPostImages } from "@/utils/postImages";
+import { getAllPostsFromBucket } from "@/utils/bucketApi";
 import { mockPosts } from "@/utils/mockData";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,7 @@ export function PostsListingPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Get filter from URL params
   const filter = searchParams.get("filter") || "all";
@@ -70,11 +72,58 @@ export function PostsListingPage() {
   }, [category, sort, filter]);
 
   useEffect(() => {
-    // Use mock data instead of API call
-    setLoading(true);
-    setPosts(mockPosts);
-    setLoading(false);
-  }, []);
+    // Load posts from Bucket API, fallback to mock data
+    const loadPosts = async () => {
+      setLoading(true);
+      try {
+        const bucketPosts = await getAllPostsFromBucket();
+        // Transform Bucket API posts to match Post interface
+        const transformedPosts: Post[] = bucketPosts.map((p: any) => ({
+          id: parseInt(p.id?.replace(/\D/g, "") || Date.now().toString()),
+          title: p.title,
+          description: p.description,
+          price: p.price,
+          category: p.category,
+          seller_id: p.seller_id || 1,
+          university: p.university || "University of Wisconsin-Madison",
+          images: p.images || [],
+          views: p.views || 0,
+          status: p.status || "active",
+          contact_method: p.contact_method,
+          course: p.course,
+          event: p.event,
+          location: p.location,
+          event_date: p.event_date,
+          created_at: p.created_at || new Date().toISOString(),
+          updated_at: p.updated_at || new Date().toISOString(),
+          seller_name: p.seller_name,
+          seller_email: p.seller_email,
+        }));
+
+        // Combine with mock posts (mock posts are the premade ones)
+        const allPosts = [...mockPosts, ...transformedPosts];
+        setPosts(allPosts);
+      } catch (error) {
+        console.error("Error loading posts:", error);
+        // Fallback to mock data on error
+        setPosts(mockPosts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPosts();
+
+    // Listen for post creation events
+    const handlePostCreated = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
+    window.addEventListener("postCreated", handlePostCreated);
+    return () => {
+      window.removeEventListener("postCreated", handlePostCreated);
+    };
+  }, [refreshKey]);
 
   useEffect(() => {
     let filtered = [...posts];

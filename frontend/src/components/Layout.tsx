@@ -62,9 +62,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
               <span className="text-white">Campus</span>
               <span className="text-teal-400">Resale</span>
             </button>
-            <div className="text-gray-400 text-sm">
-              © 2025 CampusResale. All rights reserved.
-            </div>
           </div>
         </div>
       </footer>
